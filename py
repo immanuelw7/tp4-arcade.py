@@ -1,117 +1,121 @@
 import arcade
 import random
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 100
+SCREEN_HEIGHT = 200
+les_couleurs = [arcade.color.AERO_BLUE, arcade.color.AFRICAN_VIOLET, arcade.color.AIR_FORCE_BLUE, arcade.color.AQUA,
+                arcade.color.BABY_BLUE_EYES, arcade.color.BANANA_YELLOW, arcade.color.BLIZZARD_BLUE,
+                arcade.color.BLUEBERRY]
+
+
 
 class Balle:
-    def __init__(self, x, y, change_x, change_y, rayon, color):
+    def __init__(self, x, y, c_x, c_y, rayon, colors):
         self.x = x
         self.y = y
-        self.change_x = change_x
-        self.change_y = change_y
+        self.c_x = c_x
+        self.c_y = c_y
         self.rayon = rayon
-        self.color = color
+        self.colors = colors
 
     def update(self):
-        self.x += self.change_x
-        self.y += self.change_y
+
+        self.x += self.c_x
+        self.y += self.c_y
 
         if self.x < self.rayon:
-            self.x = self.rayon
-            self.change_x *= -1
+
+            self.c_x *= -1
         elif self.x > SCREEN_WIDTH - self.rayon:
-            self.x = SCREEN_WIDTH - self.rayon
-            self.change_x *= -1
+
+            self.c_x *= -1
         if self.y < self.rayon:
-            self.y = self.rayon
-            self.change_y *= -1
+
+            self.c_y *= -1
         elif self.y > SCREEN_HEIGHT - self.rayon:
-            self.y = SCREEN_HEIGHT - self.rayon
-            self.change_y *= -1
+
+            self.c_y *= -1
 
     def draw(self):
-        arcade.draw_circle_filled(self.x, self.y, self.rayon, self.color)
+        arcade.draw_circle_filled(self.x, self.y, self.rayon, self.colors)
 
 
 class Rectangle:
-    def __init__(self, x, y, change_x, change_y, width, height, color, angle):
+    def draw(self):
+        arcade.draw_rectangle_filled(self.x, self.y, self.width, self.height, self.colors, self.angle)
+    def __init__(self, x, y, c_x, c_y, width, height, colors, angle):
         self.x = x
         self.y = y
-        self.change_x = change_x
-        self.change_y = change_y
+        self.c_x = c_x
+        self.c_y = c_y
         self.width = width
         self.height = height
-        self.color = color
+        self.colors = colors
         self.angle = angle
-
     def update(self):
-        self.x += self.change_x
-        self.y += self.change_y
-
+        self.x += self.c_x
+        self.y += self.c_y
         if self.x < 0:
             self.x = 0
-            self.change_x *= -1
-        elif self.x + self.width > SCREEN_WIDTH:
+            self.c_x *= -1
+        elif self.x > SCREEN_WIDTH - self.width:
             self.x = SCREEN_WIDTH - self.width
-            self.change_x *= -1
+            self.c_x *= -1
         if self.y < 0:
             self.y = 0
-            self.change_y *= -1
-        elif self.y + self.height > SCREEN_HEIGHT:
+            self.c_y *= -1
+        elif self.y > SCREEN_HEIGHT - self.height:
             self.y = SCREEN_HEIGHT - self.height
-            self.change_y *= -1
-
-    def draw(self):
-        arcade.draw_rectangle_filled(self.x, self.y, self.width, self.height, self.color, self.angle)
+            self.c_y *= -1
 
 
 class MyGame(arcade.Window):
-    def __init__(self, width, height, title):
-        super().__init__(width, height, title)
-        arcade.set_background_color(arcade.color.WHITE)
+    def __init__(self):
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "bruhh")
         self.l_balle = []
-        self.l_rectangle = []
+        self.l_recs = []
 
+    def setup(self):
+        arcade.set_background_color(arcade.color.BLACK)
+        arcade.schedule(self.update, 1/60)
+    def update(self, delta_time):
+        for balle in self.l_balle:
+            balle.update()
+        for rec in self.l_recs:
+            rec.update()
     def on_draw(self):
         arcade.start_render()
         for balle in self.l_balle:
             balle.draw()
-        for rectangle in self.l_rectangle:
-            rectangle.draw()
+        for recs in self.l_recs:
+            recs.draw()
 
-    def on_update(self, delta_time):
-        for balle in self.l_balle:
-            balle.update()
-        for rectangle in self.l_rectangle:
-            rectangle.update()
-
-    def on_key_press(self, key, modifiers):
-        pass
-
-    def on_key_release(self, key, modifiers):
-        pass
-
-    def on_mouse_motion(self, x, y, delta_x, delta_y):
-        pass
 
     def on_mouse_press(self, x, y, button, modifiers):
-        les_couleurs = [arcade.color.RED, arcade.color.BLUE, arcade.color.GREEN, arcade.color.ORANGE,
-                        arcade.color.PINK, arcade.color.PURPLE, arcade.color.YELLOW]
-
         if button == arcade.MOUSE_BUTTON_LEFT:
-            rayon = random.randint(10, 30)
-            color = random.choice(les_couleurs)
-            balle = Balle(x, y, random.randint(-10, 10), random.randint(-10, 10), rayon, color)
+            rayon = random.uniform(10, 30)
+            colors = random.choice(les_couleurs)
+            balle = Balle(x, y, random.uniform(-5, 5), random.uniform(-5, 5), rayon, colors)
+            if balle.c_y == 0:
+                balle.c_y = 1
+            if balle.c_x == 0:
+                balle.c_x = 1
             self.l_balle.append(balle)
         elif button == arcade.MOUSE_BUTTON_RIGHT:
-            color = random.choice(les_couleurs)
-            rectangle = Rectangle(x, y, random.randint(-10, 10), random.randint(-10, 10),
-                                   random.randint(20, 100), random.randint(20, 100), color, random.randint(0, 360))
-            self.l_rectangle.append(rectangle)
-
-
+            width = random.uniform(20, 50)
+            height = random.uniform(20, 50)
+            colors = random.choice(les_couleurs)
+            rec = Rectangle(x, y, random.uniform(-5, 5), random.uniform(-5, 5), width, height, colors, random.uniform(1,180))
+            if rec.c_y == 0:
+                rec.c_y = 1
+            if rec.c_x == 0:
+                rec.c_x = 1
+            self.l_recs.append(rec)
 def main():
-    my_game = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, "My Game")
+    window = MyGame()
+    window.setup()
     arcade.run()
 
+
+
+main()
